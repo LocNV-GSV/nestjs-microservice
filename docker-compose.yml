@@ -1,40 +1,26 @@
 version: '3.8'
 
 services:
-  dev:
-    container_name: nestjs_api_dev
-    image: nestjs-api-dev:1.0.0
-    build:
-      context: .
-      target: development
-      dockerfile: ./Dockerfile
-    command: npm run start:debug
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
     ports:
-      - 3000:3000
-      - 9229:9229
-    networks:
-      - nesjs-network
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    restart: unless-stopped
-  prod:
-    container_name: nestjs_api_prod
-    image: nestjs-api-prod:1.0.0
-    build:
-      context: .
-      target: production
-      dockerfile: ./Dockerfile
-    command: npm run start:prod
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:latest
     ports:
-      - 3000:3000
-      - 9229:9229
-    networks:
-      - nesjs-network
+      - "9092:9092"
+    expose:
+      - "9093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "my-topic:1:1"
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    restart: unless-stopped
+      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   nesjs-network:
