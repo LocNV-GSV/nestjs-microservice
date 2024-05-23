@@ -29,8 +29,6 @@ export class AuthService {
 
   // TODO: Getting user from Database
   getUserFromDatabase(email: string): Promise<User | undefined> {
-    console.log(USERS.filter((item) => item.email == email)[0], email);
-    
     return USERS.filter((item) => item.email == email)[0];
   }
 

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class ArticleService {
     constructor() { }
 
-    createArticle(user_id: string) {
+    createArticle(user_id: number) {
         return {
             id: 1,
             user_id: user_id,

@@ -31,7 +31,6 @@ export class AuthController {
     @Post('login')
     async login(@Req() request: Request): Promise<any> {
         let { email, password }: SignupRequest | any = request.body;
-        console.log({ email, password });
 
         let user = await this.authService.getUserFromDatabase(email);
         if (!user)
