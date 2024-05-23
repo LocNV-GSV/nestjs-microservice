@@ -13,7 +13,7 @@ async function bootstrap() {
       },
       producerOnlyMode: true,
       consumer: {
-        groupId: 'auth-consumer',
+        groupId: 'nestjs-kafka',
       },
     },
   });

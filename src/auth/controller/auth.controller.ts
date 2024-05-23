@@ -13,7 +13,7 @@ export class AuthController {
 
     @Post('signup')
     async signup(@Req() request: Request): Promise<any> {
-        let { email, password, name, location }: SignupRequest | any = request.body;
+        let { email, password, name, location }: SignupRequest = request.body;
         let user = await this.authService.getUserFromDatabase(email);
         if (user)
             throw new HttpException('User Already exist', HttpStatus.BAD_REQUEST);
@@ -30,7 +30,7 @@ export class AuthController {
 
     @Post('login')
     async login(@Req() request: Request): Promise<any> {
-        let { email, password }: SignupRequest | any = request.body;
+        let { email, password }: SignupRequest = request.body;
 
         let user = await this.authService.getUserFromDatabase(email);
         if (!user)
