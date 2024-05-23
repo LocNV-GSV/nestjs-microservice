@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProducerService } from './kafka/producer.service';
-import { UsersService } from './users/users.service';
+import { UsersService } from './users/service/users.service';
 
 @Injectable()
 export class AppService {
@@ -19,19 +19,5 @@ export class AppService {
       ],
     });
     return 'Hello World!';
-  }
-
-  async getFindAllUSer() {
-    const text = await this.usersService.killDragon({
-      topic: 'kill.dragon',
-      messages: [
-        {
-          heroId: 123,
-          dragonId: 999,
-        },
-      ],
-    });
-   
-    return text;
   }
 }

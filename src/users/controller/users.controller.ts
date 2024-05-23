@@ -1,19 +1,20 @@
-import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UsersService } from './users.service';
+import { Controller, Get } from '@nestjs/common';
+import { Ctx, EventPattern, KafkaContext, MessagePattern, Payload } from '@nestjs/microservices';
+import { EventName } from '../constants';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { UsersService } from '../service/users.service';
 
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @MessagePattern('createUser')
-  create(@Payload() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @EventPattern(EventName.CreateOrder.valueOf())
+  public create(@Payload() payload: any, @Ctx() context: KafkaContext): void {
+    console.log(payload);
+    console.log('Kafka called');
   }
 
-  @MessagePattern('findAllUsers')
+  // @MessagePattern('findAllUsers')
   findAll() {
     return this.usersService.findAll();
   }
