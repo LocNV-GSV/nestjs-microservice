@@ -7,9 +7,10 @@ import { CatsService } from './cats/cats.service';
 import { KafkaModule } from './kafka/kafka.module';
 import { TestConsumer } from './test.consumer';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [KafkaModule, CatsModule, UsersModule],
+  imports: [KafkaModule, CatsModule, UsersModule, AuthModule],
   controllers: [AppController, CatsController],
   providers: [AppService, TestConsumer, CatsService],
 })
