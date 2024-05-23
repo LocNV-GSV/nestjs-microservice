@@ -8,9 +8,10 @@ import { KafkaModule } from './kafka/kafka.module';
 import { TestConsumer } from './test.consumer';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ArticleModule } from './article/article.module';
 
 @Module({
-  imports: [KafkaModule, CatsModule, UsersModule, AuthModule],
+  imports: [KafkaModule, CatsModule, UsersModule, AuthModule, ArticleModule],
   controllers: [AppController, CatsController],
   providers: [AppService, TestConsumer, CatsService],
 })
