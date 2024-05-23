@@ -5,10 +5,16 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.TCP,
+    transport: Transport.KAFKA,
     options: {
-      host: '127.0.0.1',
-      port: 3000,
+      client: {
+        clientId: 'auth',
+        brokers: ['localhost:9092'],
+      },
+      producerOnlyMode: true,
+      consumer: {
+        groupId: 'auth-consumer',
+      },
     },
   });
   await app.startAllMicroservices();
