@@ -12,6 +12,7 @@ export class AppService implements OnModuleInit {
   async onModuleInit() {
     // Consume Data with Spcific topic
     await this.consumerService.consume(
+      'article_created',
       { topic: 'article_created' },
       {
         eachMessage: async ({ topic, partition, message }) => {
