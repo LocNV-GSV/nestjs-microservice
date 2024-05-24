@@ -22,7 +22,7 @@ export class AuthService {
 
   async getUserFromDatabase(email: string): Promise<User> {
     const user = await this.prisma.user.findUniqueOrThrow({
-      where: { email: email },
+      where: { email: email, deletedAt: null },
     });
 
     if (!user) {
@@ -136,8 +136,11 @@ export class AuthService {
         where: { id },
       });
 
-      await this.prisma.user.delete({
+      await this.prisma.user.update({
         where: { id },
+        data: {
+          deletedAt: new Date()
+        }
       });
 
       return `User with id ${user.id} deleted`;
