@@ -35,7 +35,8 @@ export class AuthService {
       name: user.name,
       location: user.location,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
+      deletedAt: user.deletedAt
     }
   }
 

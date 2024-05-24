@@ -13,6 +13,7 @@ export interface User {
     location: string;
     createdAt?: Date,
     updatedAt?: Date,
+    deletedAt?: Date,
 }
 
 export interface LoginResponse {

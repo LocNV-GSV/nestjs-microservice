@@ -11,19 +11,19 @@ export class ArticleController {
     ) { }
 
     @Post()
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     async createArticle(@Req() request: any) {
-        const article = this.articleService.createArticle(request.user.id);
+        const article = this.articleService.createArticle(request?.user?.id);
         // Sending article and user to our CQRS microservice
         await this.producerService.produce({
             topic: 'article_created',
             messages: [
                 {
                     value: JSON.stringify({
-                        user_id: request.user.id,
-                        user_name: request.user.name,
-                        user_email: request.user.email,
-                        user_location: request.user.location,
+                        user_id: request?.user?.id,
+                        user_name: request?.user?.name,
+                        user_email: request?.user?.email,
+                        user_location: request?.user?.location,
                         article_id: article.id,
                         article_title: article.title,
                         article_image: article.image,
