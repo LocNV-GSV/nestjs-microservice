@@ -9,6 +9,7 @@ import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { LoginUserDto } from '../dto/login-user.dto';
+import { UpdateUsertDto } from '../dto/update-user.dto';
 
 
 @Injectable()
@@ -32,7 +33,9 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
-      location: user.location
+      location: user.location,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     }
   }
 
@@ -104,5 +107,48 @@ export class AuthService {
     const token = await this.jwtService.signAsync({ user_id: user.id, email });
 
     return { access_token: token };
+  }
+
+  async updatedUser(id: number, updateUserDto: UpdateUsertDto): Promise<User> {
+    await this.prisma.user.findUniqueOrThrow({
+      where: { id },
+    });
+
+    // update user using prisma client
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...updateUserDto,
+        ...(updateUserDto.password && {
+          password: await this.hashPassword(updateUserDto.password),
+        }),
+      },
+    });
+
+    delete updatedUser.password;
+
+    return updatedUser;
+  }
+
+  async deleteUser(id: number): Promise<string> {
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: { id },
+      });
+
+      await this.prisma.user.delete({
+        where: { id },
+      });
+
+      return `User with id ${user.id} deleted`;
+    } catch (error) {
+      // check if user not found and throw error
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`User with id ${id} not found`);
+      }
+
+      // throw error if any
+      throw new HttpException(error, 500);
+    }
   }
 }
