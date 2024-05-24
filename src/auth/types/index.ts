@@ -11,6 +11,8 @@ export interface User {
     password?: string;
     name: string;
     location: string;
+    createdAt?: Date,
+    updatedAt?: Date,
 }
 
 export interface LoginResponse {

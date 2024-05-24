@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Req } from '@nestjs/common';
-import { AuthService } from '../service/auth.service';
-import { SignupRequest, User } from '../types';
-import { Request } from 'express';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
+import { UpdateUsertDto } from '../dto/update-user.dto';
+import { AuthService } from '../service/auth.service';
+import { User } from '../types';
 
 @Controller('auth')
 export class AuthController {
@@ -34,5 +35,18 @@ export class AuthController {
     @Post('register')
     async registerUser(@Body() createUserDto: CreateUserDto): Promise<User> {
         return await this.authService.registerUser(createUserDto);
+    }
+
+    @Put(':id')
+    async updateUser(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateUserDto: UpdateUsertDto,
+    ): Promise<User> {
+        return await this.authService.updatedUser(id, updateUserDto);
+    }
+
+    @Delete(':id')
+    async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<string> {
+      return this.authService.deleteUser(+id);
     }
 }
