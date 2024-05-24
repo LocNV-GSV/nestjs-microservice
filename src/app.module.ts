@@ -11,6 +11,6 @@ import { TestConsumer } from './test.consumer';
 @Module({
   imports: [KafkaModule, AuthModule, ArticleModule, PrismaModule],
   controllers: [AppController],
-  providers: [AppService, TestConsumer],
+  providers: [AppService, TestConsumer,],
 })
 export class AppModule { }

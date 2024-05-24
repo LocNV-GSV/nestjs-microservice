@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, Request, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UpdateUsertDto } from '../dto/update-user.dto';
 import { AuthService } from '../service/auth.service';
 import { User } from '../types';
+import { AuthGuard } from '../auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -17,19 +17,6 @@ export class AuthController {
     @Post('login')
     async login(@Body() loginUserDto: LoginUserDto): Promise<any> {
         return await this.authService.signin(loginUserDto)
-    }
-
-    @Get('info')
-    async getUserInfo(@Req() request: Request): Promise<any> {
-        const token = request.headers.authorization;
-        if (!token) {
-            return new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-        }
-        // Check verify Token
-        const { email } = await this.jwtService.verifyAsync(token);
-
-        // Fetching user information from database using the email
-        return await this.authService.getUserFromDatabase(email);
     }
 
     @Post('register')
@@ -47,6 +34,12 @@ export class AuthController {
 
     @Delete(':id')
     async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<string> {
-      return this.authService.deleteUser(+id);
+        return this.authService.deleteUser(+id);
+    }
+
+    @Get('me')
+    @UseGuards(AuthGuard)
+    async me(@Request() request) {
+        return this.authService.getUserFromDatabase(request.user.email);
     }
 }
