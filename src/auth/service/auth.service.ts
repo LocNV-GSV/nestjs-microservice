@@ -1,58 +1,72 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from '../types';
+import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { LoginResponse, SignupRequest, User } from '../types';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { PrismaService } from 'prisma/service/prisma.service';
+import { compare, hash } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
+import { LoginUserDto } from '../dto/login-user.dto';
 
-const USERS: User[] | any = [
-  {
-    id: 1,
-    email: 'user1@gmail.com',
-    password: '$2b$10$9Zha4W6B6XhJDqlocccxHuIm4jp.rGpLahN2u2FmnRjXe7Mi2fpny',
-    name: 'User 1',
-    location: 'Algeria',
-  },
-  {
-    id: 2,
-    email: 'user2@gmail.com',
-    password: '$2b$10$FeU/xDkbGqeSGcZLYLQi0Oj70hFvRG76iG2DB3F1TOJGRgqP72z1i',
-    name: 'User 2',
-    location: 'Algeria',
-  },
-];
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly httpService: HttpService,
-  ) {}
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) { }
 
-  // TODO: Getting user from Database
-  getUserFromDatabase(email: string): Promise<User | undefined> {
-    return USERS.filter((item) => item.email == email)[0];
+  async getUserFromDatabase(email: string): Promise<User> {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { email: email },
+    });
+
+    if (!user) {
+      throw new HttpException('User does not exist', HttpStatus.BAD_REQUEST);
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      location: user.location
+    }
   }
 
-  // TODO: Hashing password with bcrypt
+  // Hashing password with bcrypt
   async hashPassword(password: string): Promise<string> {
-    return password;
+    return await hash(password, 10)
   }
 
-  // TODO: saving user to database
-  saveUser({
-    email,
-    name,
-    location,
-    password: hashedPass,
-  }: {
-    email: string;
-    name: string;
-    location: string;
-    password: string;
-  }): string {
-    return 'User created successfully';
+  async registerUser(createUserDto: CreateUserDto): Promise<User> {
+    try {
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: createUserDto.email,
+          password: await this.hashPassword(createUserDto.password),
+          name: createUserDto.name,
+          location: createUserDto.location
+        },
+      });
+
+      // remove password from response
+      delete newUser.password;
+
+      return newUser;
+    } catch (error) {
+      // check if email already registered and throw error
+      if (error.code === 'P2002') {
+        throw new ConflictException('Email already registered');
+      }
+
+      throw new HttpException(error, 500);
+    };
   }
 
-  async getUser(token: string): Promise<any> {
+  async getUser(token: string): Promise<User> {
     // Send the token to the auth microservice through HTTP
     const { data } = await firstValueFrom(
       this.httpService
@@ -68,5 +82,27 @@ export class AuthService {
         ),
     );
     return data;
+  }
+
+  async signin(loginUserDto: LoginUserDto): Promise<LoginResponse> {
+    let { email, password }: LoginUserDto = loginUserDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: email },
+    });
+
+    // check if user exists
+    if (!user) {
+      throw new HttpException('User does not exist', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!(await compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Generate token from user_id and email
+    const token = await this.jwtService.signAsync({ user_id: user.id, email });
+
+    return { access_token: token };
   }
 }
