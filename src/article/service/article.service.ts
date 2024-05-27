@@ -5,6 +5,7 @@ import { Article } from '../types';
 import { ExpressRequestWithUser } from 'src/auth/interface/express-request-with-user.interface';
 import { AuthService } from 'src/auth/service/auth.service';
 import { Prisma } from '@prisma/client';
+import { UpdateArticleDto } from '../dto/update-article.dto';
 
 @Injectable()
 export class ArticleService {
@@ -66,4 +67,63 @@ export class ArticleService {
             }
         };
     }
+
+    async updateArticle (id: number, updateArticleDto: UpdateArticleDto): Promise<Article> {
+        try {
+            // find article by id. If not found, throw error
+            await this.prisma.article.findUniqueOrThrow({
+              where: { id },
+            });
+      
+            // update article using prisma client
+            const updatedArticle = await this.prisma.article.update({
+              where: { id },
+              data: {
+                ...updateArticleDto,
+              },
+            });
+      
+            return updatedArticle;
+          } catch (error) {
+            // check if post not found and throw error
+            if (error.code === 'P2025') {
+              throw new NotFoundException(`Post with id ${id} not found`);
+            }
+      
+            // check if email already registered and throw error
+            if (error.code === 'P2002') {
+              throw new ConflictException('Email already registered');
+            }
+      
+            // throw error if any
+            throw new HttpException(error, 500);
+          }
+    }
+
+    async deleteArticle(id: number): Promise<string> {
+        try {
+          // find article by id. If not found, throw error
+          const article = await this.prisma.article.findUniqueOrThrow({
+            where: { id },
+          });
+    
+          // delete article using prisma client
+          await this.prisma.article.update({
+            where: { id },
+            data: {
+              deletedAt: new Date()
+            }
+          });
+    
+          return `Post with id ${article.id} deleted`;
+        } catch (error) {
+          // check if post not found and throw error
+          if (error.code === 'P2025') {
+            throw new NotFoundException(`Post with id ${id} not found`);
+          }
+    
+          // throw error if any
+          throw new HttpException(error, 500);
+        }
+      }
 }
