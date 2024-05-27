@@ -12,8 +12,9 @@ export class CreateConsumer implements OnModuleInit {
             {
                 eachMessage: async ({ topic, partition, message }) => {
                     // TODO: write event values into database
-                    console.log("event created ", {
+                    console.log("event created employee", {
                         source: 'create-consumer',
+                        // message: message.value.toString(),
                         message: JSON.parse(message.value as any),
                         partition: partition.toString(),
                         topic: topic.toString(),
@@ -25,4 +26,5 @@ export class CreateConsumer implements OnModuleInit {
             },
         );
     }
+
 }

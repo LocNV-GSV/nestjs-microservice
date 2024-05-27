@@ -6,23 +6,23 @@ export class CreateConsumer implements OnModuleInit {
     constructor(private readonly consumer: ConsumerService) { }
 
     async onModuleInit() {
+        //call message of 'update-employee'
         this.consumer.consume(
             'create-client',
-            { topic: 'create-employee' },
+            { topic: 'update-employee' },
             {
                 eachMessage: async ({ topic, partition, message }) => {
                     // TODO: write event values into database
-                    console.log("event created ", {
-                        source: 'create-consumer',
+                    console.log("event updated employee", {
+                        source: 'update-consumer',
+                        // message: message.value.toString(),
                         message: JSON.parse(message.value as any),
                         partition: partition.toString(),
                         topic: topic.toString(),
                     });
-                    // topic: create-consume
-                    // message.value: data of user and article that the producer sent as a Buffer
-                    // We need convert buffer to string with "toString()"
                 },
             },
         );
     }
+
 }

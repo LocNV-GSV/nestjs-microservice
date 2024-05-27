@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User } from 'src/auth/types';
 import { ProducerService } from 'src/kafka/producer.service';
 
 @Injectable()
@@ -7,11 +8,18 @@ export class EmployeeService {
 
     create() {
         console.log('create call');
+        const newUser = {
+            name: " data.username",
+            password: "123456",
+            email: "data.email",
+            location: "string",
+        };
+
         this.kafka.produce({
             topic: 'create-employee',
-            messages: [{ value: 'this is emplotyee create' }],
+            messages: [{ value: JSON.stringify(newUser as User) }],
         });
-        return "Created Emplyee"
+        return 'Created Emplyee';
     }
 
     async update() {
@@ -20,6 +28,6 @@ export class EmployeeService {
             topic: 'update-employee',
             messages: [{ value: 'this is emplotyee update' }],
         });
-        return "Updated Emplyee"
+        return 'Updated Emplyee';
     }
 }
