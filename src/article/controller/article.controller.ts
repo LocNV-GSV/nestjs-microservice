@@ -1,8 +1,12 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
+    Param,
+    ParseIntPipe,
     Post,
+    Put,
     Request,
     UseGuards
 } from '@nestjs/common';
@@ -12,8 +16,11 @@ import { ProducerService } from 'src/kafka/producer.service';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { ArticleService } from '../service/article.service';
 import { Article } from '../types';
+import { UpdateArticleDto } from '../dto/update-article.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('article')
+@ApiTags('Articles')
 export class ArticleController {
     constructor(
         private readonly articleService: ArticleService,
@@ -61,5 +68,21 @@ export class ArticleController {
         @Request() requesttWithUser: ExpressRequestWithUser,
     ): Promise<Article> {
         return await this.articleService.getAllArticleByUserId(requesttWithUser);
+    }
+
+    @Put(':id')
+    @UseGuards(AuthGuard)
+    async updateArticle(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateArticleDto: UpdateArticleDto,
+    ): Promise<Article> {
+        return this.articleService.updateArticle(+id, updateArticleDto);
+    }
+
+
+    @Delete(':id')
+    @UseGuards(AuthGuard)
+    async deletePost(@Param('id', ParseIntPipe) id: number): Promise<string> {
+        return this.articleService.deleteArticle(+id);
     }
 }

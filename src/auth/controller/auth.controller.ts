@@ -1,13 +1,15 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../auth.guard';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
 import { UpdateUsertDto } from '../dto/update-user.dto';
 import { AuthService } from '../service/auth.service';
 import { User } from '../types';
-import { AuthGuard } from '../auth.guard';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
