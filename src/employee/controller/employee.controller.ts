@@ -1,7 +1,9 @@
 import { Controller, Post, Put } from '@nestjs/common';
 import { EmployeeService } from '../service/employee.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('employee')
+@ApiTags('Employee')
 export class EmployeeController {
   constructor(
     private employeeService: EmployeeService,
